@@ -31,7 +31,7 @@ jobs:
       - name: Build and Tag Docker Image
         run: |
           REPOSITORY_URI=120569615146.dkr.ecr.us-east-1.amazonaws.com/uppuanji 
-          COMMIT_SHA=${{ github.sha }}       
+          COMMIT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)      
           docker build -t $REPOSITORY_URI:$COMMIT_SHA .
           docker tag $REPOSITORY_URI:$COMMIT_SHA $REPOSITORY_URI:$COMMIT_SHA
           docker images
@@ -40,5 +40,5 @@ jobs:
       - name: Push Docker Image
         run: |
           REPOSITORY_URI=120569615146.dkr.ecr.us-east-1.amazonaws.com/uppuanji
-          COMMIT_SHA=${{ github.sha }}
+          COMMIT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           docker push $REPOSITORY_URI:$COMMIT_SHA
