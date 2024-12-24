@@ -1,0 +1,44 @@
+name: Build and Push Docker Image with Commit ID
+
+on:
+  push:
+    branches:
+      - master  # Trigger workflow on push to the 'main' branch
+
+jobs:
+  build_and_push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up AWS credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # Step 3: Log in to AWS ECR
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Step 4: Build and Tag Docker Image with Git Commit ID
+      - name: Build and Tag Docker Image
+        run: |
+          REPOSITORY_URI=120569615146.dkr.ecr.us-east-1.amazonaws.com/uppuanji 
+          COMMIT_SHA=${{ github.sha }}       
+          docker build -t $REPOSITORY_URI:$COMMIT_SHA .
+          docker tag $REPOSITORY_URI:$COMMIT_SHA $REPOSITORY_URI:$COMMIT_SHA
+          docker images
+
+      # Step 5: Push Docker Image to ECR
+      - name: Push Docker Image
+        run: |
+          REPOSITORY_URI=120569615146.dkr.ecr.us-east-1.amazonaws.com/uppuanji
+          COMMIT_SHA=${{ github.sha }}
+          docker push $REPOSITORY_URI:$COMMIT_SHA
